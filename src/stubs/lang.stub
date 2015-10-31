@@ -1,0 +1,15 @@
+<?php
+return [
+    'create_header' => 'Create new %%crudNameSingularCap%%',
+    'edit_header' => 'Edit %%crudNameSingularCap%%',
+    'show_header' => '%%crudNameSingularCap%%',
+    'index_header' => '%%crudNamePluralCap%%',
+    'add_new' => 'Add New %%crudNameSingularCap%%',
+    'delete' => 'Delete',
+    'update' => 'Update',
+    'actions' => 'Actions',
+    'no' => 'No.',
+    'edit_save' => 'Save',
+    %%labels%%
+
+];

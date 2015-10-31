@@ -63,7 +63,8 @@ class CrudViewCommand extends Command
 
         $formFieldsHtml = '';
         foreach ($formFields as $item) {
-            $label = ucwords(strtolower(str_replace('_', ' ', $item['name'])));
+            //$label = ucwords(strtolower(str_replace('_', ' ', $item['name'])));
+            $label = "trans('label_{$item['name']}')";
 
             if ($item['type'] == 'string') {
                 $formFieldsHtml .=
@@ -114,13 +115,16 @@ class CrudViewCommand extends Command
         $formBodyHtmlForShowView = '';
 
         $i = 0;
+        $labels = [];
         foreach ($formFields as $key => $value) {
+            $field = $value['name'];
+            $label = ucwords(str_replace('_', ' ', $field));
+            $labels[] = "'label_$field' => '$label'";
             if ($i == 3) {
                 break;
             }
 
-            $field = $value['name'];
-            $label = ucwords(str_replace('_', ' ', $field));
+
             $formHeadingHtml .= '<th>' . $label . '</th>';
 
             if ($i == 0) {
@@ -180,6 +184,23 @@ class CrudViewCommand extends Command
             file_put_contents($newShowFile, str_replace('%%formBodyHtml%%', $formBodyHtmlForShowView, file_get_contents($newShowFile)));
             file_put_contents($newShowFile, str_replace('%%crudNameSingular%%', $crudNameSingular, file_get_contents($newShowFile)));
             file_put_contents($newShowFile, str_replace('%%crudNameSingularCap%%', $crudNameSingularCap, file_get_contents($newShowFile)));
+        }
+
+        $langDirectory = base_path('resources/lang/en');
+
+        if (!File::isDirectory($langDirectory)) {
+            File::makeDirectory($langDirectory, 0755, true);
+        }
+
+        $langFile = __DIR__ . '/../stubs/lang.stub';
+        $newLangFile = $langDirectory . '/en.php';
+        if (!File::copy($langFile, $newLangFile)) {
+            echo "failed to copy $langFile...\n";
+        } else {
+            File::put($newLangFile, str_replace('%%crudNameSingular%%', $crudNameSingular, File::get($newLangFile)));
+            File::put($newLangFile, str_replace('%%crudNameSingularCap%%', $crudNameSingularCap, File::get($newLangFile)));
+            File::put($newLangFile, str_replace('%%crudNamePluralCap%%', $crudNamePluralCap, File::get($newLangFile)));
+            File::put($newLangFile, str_replace('%%labels%%', implode(",\n", $labels), File::get($newLangFile)));
         }
 
         // For layouts/master.blade.php file
