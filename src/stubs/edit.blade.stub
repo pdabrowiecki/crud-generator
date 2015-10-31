@@ -1,18 +1,20 @@
 @extends('layouts.master')
+@section('breadcrumbs', Breadcrumbs::render('%%crudNameSingular%%.edit', $%%crudNameSingular%%))
+@endsection
 
 @section('content')
 
-    <h1>Edit %%crudNameSingularCap%%</h1>
-    <hr/>
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h2 class="box-title">{{ trans('%%crudNameSingular%%.edit_header') }}</h2>
+    </div>
 
-    {!! Form::model($%%crudNameSingular%%, ['method' => 'PATCH', 'action' => ['%%crudNameCap%%Controller@update', $%%crudNameSingular%%->id], 'class' => 'form-horizontal']) !!}
-
-    %%formFieldsHtml%%
-    
-    <div class="form-group">
-        <div class="col-sm-offset-3 col-sm-3">
-            {!! Form::submit('Update', ['class' => 'btn btn-primary form-control']) !!}
-        </div>
+    {!! Form::model($%%crudNameSingular%%, ['method' => 'PATCH', 'action' => ['%%namespace%%%%crudNameCap%%Controller@update', $%%crudNameSingular%%->id], 'class' => 'form-horizontal']) !!}
+    <div class="box-body">
+        %%formFieldsHtml%%
+    </div>
+    <div class="box-footer">
+        {!! Form::submit(trans('%%crudNameSingular%%.edit_save'), ['class' => 'btn btn-primary pull-right']) !!}
     </div>
     {!! Form::close() !!}
 
@@ -24,4 +26,29 @@
         </ul>
     @endif
 
+@endsection
+
+@section('js')
+<script>
+    $.fn.datepicker.defaults.format = "yyyy-mm-dd";
+    $.fn.datepicker.defaults.language = "{!! App::getLocale() !!}";
+    $(document).ready(function() {
+        $('.optional').change(function() {
+            $(this).parent().next().attr('disabled', !this.checked);
+
+            if (!this.checked) {
+                $(this).parent().next().val('');
+                $(this).parent().next().attr('readonly', 'readonly');
+            } else {
+                $(this).parent().next().removeAttr('readonly');
+            }
+        }).each(function() {
+            this.checked = $(this).parent().next().val() ? true : false;
+            $(this).parent().next().attr('disabled', !this.checked);
+        });
+        $('form').submit(function() {
+            $(this).find('input').attr('disabled', false);
+        });
+    });
+</script>
 @endsection

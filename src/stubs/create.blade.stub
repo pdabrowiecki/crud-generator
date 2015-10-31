@@ -1,18 +1,20 @@
 @extends('layouts.master')
+@section('breadcrumbs', Breadcrumbs::render('%%crudName%%.create'))
+@endsection
 
 @section('content')
 
-    <h1>Create New %%crudNameSingularCap%%</h1>
-    <hr/>
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h2 class="box-title">{{ trans('%%crudNameSingular%%.create_header') }}</h2>
+    </div>
 
-    {!! Form::open(['url' => '%%crudName%%', 'class' => 'form-horizontal']) !!}
-    
-    %%formFieldsHtml%%
-
-    <div class="form-group">
-        <div class="col-sm-offset-3 col-sm-3">
-            {!! Form::submit('Create', ['class' => 'btn btn-primary form-control']) !!}
-        </div>    
+    {!! Form::open(['url' => $prefix, 'class' => 'form-horizontal']) !!}
+    <div class="box-body">
+        %%formFieldsHtml%%
+    </div>
+    <div class="box-footer">
+        {!! Form::submit(trans('%%crudNameSingular%%.create_save'), ['class' => 'btn btn-primary pull-right']) !!}
     </div>
     {!! Form::close() !!}
 
@@ -24,4 +26,16 @@
         </ul>
     @endif
 
+@endsection
+
+@section('js')
+<script>
+    $.fn.datepicker.defaults.format = "yyyy-mm-dd";
+    $.fn.datepicker.defaults.language = "{!! App::getLocale() !!}";
+    $('.optional').change(function() {
+        $(this).parent().next().attr('disabled', !this.checked);
+    }).each(function() {
+        $(this).parent().next().attr('disabled', !this.checked);
+    });
+</script>
 @endsection

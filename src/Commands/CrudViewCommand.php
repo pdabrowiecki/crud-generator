@@ -14,7 +14,8 @@ class CrudViewCommand extends Command
     protected $signature = 'crud:view
                             {name : The name of the Crud.}
                             {--fields= : The fields name for the form.}
-                            {--path= : The name of the view path.}';
+                            {--path= : The name of the view path.}
+                            {--namespace= : Namespace of the controller.}';
 
     /**
      * The console command description.
@@ -22,6 +23,75 @@ class CrudViewCommand extends Command
      * @var string
      */
     protected $description = 'Create views for the Crud.';
+
+    protected function inputText($item)
+    {
+        if ($item['optional']) {
+            $optional = '<div class="input-group-addon"><input type="checkbox" class="optional"></div>' . PHP_EOL;
+        } else {
+            $optional = '';
+        }
+
+        switch ($item['type']) {
+            case 'string':
+                return $optional
+                     . "{!! Form::text('" . $item['name'] . "', null, ['class' => 'form-control']) !!}";
+
+            case 'text':
+                return $optional
+                     . "{!! Form::textarea('" . $item['name'] . "', null, ['class' => 'form-control']) !!}";
+
+            case 'boolean':
+                return "{!! Form::checkbox('" . $item['name'] . "', null, null) !!}";
+
+            case 'integer':
+                return $optional
+                . "{!! Form::number('" . $item['name'] . "', null, ['class' => 'form-control']) !!}";
+
+            case 'date':
+                $field = "\$%%crudNameSingular%%";
+                return $optional
+                     . "{!! Form::date('" . $item['name'] . "', isset($field) ? $field->{$item['name']} : null, ['class' => 'form-control', 'data-provide' => 'datepicker']) !!}" . PHP_EOL
+                     . '<span class="input-group-addon"><i class="fa fa-calendar"> </i></span>';
+
+            case 'select':
+                return $optional
+                . "{!! Form::select('" . $item['name'] . "', array_map('trans', \${$item['name']}_options), null, ['class' => 'form-control']) !!}";
+
+            case 'currency':
+                return $optional
+                     . "{!! Form::number('" . $item['name'] . "', null, ['class' => 'form-control']) !!}" . PHP_EOL
+                     . '<span class="input-group-addon">zł</span>';
+
+            case 'password':
+                return $optional
+                     . "{!! Form::password('" . $item['name'] . "', null, ['class' => 'form-control']) !!}";
+
+
+            case 'email':
+                return $optional
+                     . "{!! Form::email('" . $item['name'] . "', null, ['class' => 'form-control']) !!}";
+
+            default:
+                return $optional
+                     . "{!! Form::text('" . $item['name'] . "', null, ['class' => 'form-control']) !!}";
+        }
+    }
+
+    protected function showField($item)
+    {
+        $field = $item['name'];
+        switch($item['type'])
+        {
+            case 'boolean':
+                return "$%%crudNameSingular%%->$field ? trans('%%crudNameSingular%%.yes') : trans('%%crudNameSingular%%.no')";
+
+            default:
+                return $item['optional'] ? "$%%crudNameSingular%%->$field ?: trans('%%crudNameSingular%%.not_applicable')"
+                                         : "$%%crudNameSingular%%->$field";
+        }
+
+    }
 
     /**
      * Execute the console command.
@@ -58,61 +128,33 @@ class CrudViewCommand extends Command
             $itemArray = explode(':', $item);
             $formFields[$x]['name'] = trim($itemArray[0]);
             $formFields[$x]['type'] = trim($itemArray[1]);
+            $formFields[$x]['hidden'] = isset($itemArray[2]) && trim($itemArray[2]) == 'hidden';
+            $formFields[$x]['optional'] = isset($itemArray[2]) && trim($itemArray[2]) == 'optional';
             $x++;
         }
 
         $formFieldsHtml = '';
         foreach ($formFields as $item) {
             //$label = ucwords(strtolower(str_replace('_', ' ', $item['name'])));
-            $label = "trans('label_{$item['name']}')";
+            $label = "trans('$crudNameSingular.label_{$item['name']}')";
 
-            if ($item['type'] == 'string') {
-                $formFieldsHtml .=
-                "<div class=\"form-group\">
-                        {!! Form::label('" . $item['name'] . "', '" . $label . ": ', ['class' => 'col-sm-3 control-label']) !!}
-                        <div class=\"col-sm-6\">
-                            {!! Form::text('" . $item['name'] . "', null, ['class' => 'form-control']) !!}
-                        </div>
-                    </div>";
-            } elseif ($item['type'] == 'text') {
-                $formFieldsHtml .=
-                "<div class=\"form-group\">
-                        {!! Form::label('" . $item['name'] . "', '" . $label . ": ', ['class' => 'col-sm-3 control-label']) !!}
-                        <div class=\"col-sm-6\">
-                            {!! Form::textarea('" . $item['name'] . "', null, ['class' => 'form-control']) !!}
-                        </div>
-                    </div>";
-            } elseif ($item['type'] == 'password') {
-                $formFieldsHtml .=
-                "<div class=\"form-group\">
-                        {!! Form::label('" . $item['name'] . "', '" . $label . ": ', ['class' => 'col-sm-3 control-label']) !!}
-                        <div class=\"col-sm-6\">
-                            {!! Form::password('" . $item['name'] . "', null, ['class' => 'form-control']) !!}
-                        </div>
-                    </div>";
-            } elseif ($item['type'] == 'email') {
-                $formFieldsHtml .=
-                "<div class=\"form-group\">
-                        {!! Form::label('" . $item['name'] . "', '" . $label . ": ', ['class' => 'col-sm-3 control-label']) !!}
-                        <div class=\"col-sm-6\">
-                            {!! Form::email('" . $item['name'] . "', null, ['class' => 'form-control']) !!}
-                        </div>
-                    </div>";
+            if ($item['hidden']) {
+                $formFieldsHtml .= "{!! Form::hidden('{$item['name']}', null) !!}\n";
             } else {
-                $formFieldsHtml .=
-                "<div class=\"form-group\">
-                        {!! Form::label('" . $item['name'] . "', '" . $label . ": ', ['class' => 'col-sm-3 control-label']) !!}
-                        <div class=\"col-sm-6\">
-                            {!! Form::text('" . $item['name'] . "', null, ['class' => 'form-control']) !!}
-                        </div>
-                    </div>";
+                $formFieldsHtml .= '<div class="form-group">'
+                    . "\n{!! Form::label('" . $item['name'] . "', " . $label . ". ': ', ['class' => 'col-sm-3 control-label']) !!}\n"
+                    . "<div class=\"col-sm-9\">\n"
+                    . '<div class="input-group col-sm-12">' . PHP_EOL
+                        . $this->inputText($item) . PHP_EOL
+                    . "</div></div>";
+                $formFieldsHtml .= "\n</div>\n";
             }
         }
 
         // Form fields and label
         $formHeadingHtml = '';
         $formBodyHtml = '';
-        $formBodyHtmlForShowView = '';
+        $showRows = '';
 
         $i = 0;
         $labels = [];
@@ -120,22 +162,26 @@ class CrudViewCommand extends Command
             $field = $value['name'];
             $label = ucwords(str_replace('_', ' ', $field));
             $labels[] = "'label_$field' => '$label'";
-            if ($i == 3) {
-                break;
-            }
+            if ($value['hidden']) continue;
 
+            $showRows .= "<tr>" . PHP_EOL
+                      .  "    <th>{{ trans('%%crudName%%.label_$field') }}</th>" . PHP_EOL
+                      .  "    <td>{{ {$this->showField($value)} }}</td>" . PHP_EOL
+                      .  "</tr>";
 
-            $formHeadingHtml .= '<th>' . $label . '</th>';
+            $formHeadingHtml .= "<th>{{ trans('%%crudName%%.label_$field') }}</th>\n";
 
             if ($i == 0) {
                 $formBodyHtml .= '<td><a href="{{ url(\'/%%crudName%%\', $item->id) }}">{{ $item->' . $field . ' }}</a></td>';
             } else {
                 $formBodyHtml .= '<td>{{ $item->' . $field . ' }}</td>';
             }
-            $formBodyHtmlForShowView .= '<td> {{ $%%crudNameSingular%%->' . $field . ' }} </td>';
-
+            $formBodyHtml .= PHP_EOL;
             $i++;
         }
+
+
+        $namespace = $this->option('namespace') ? $this->option('namespace') . '\\' : '';
 
         // For index.blade.php file
         $indexFile = __DIR__ . '/../stubs/index.blade.stub';
@@ -143,6 +189,7 @@ class CrudViewCommand extends Command
         if (!copy($indexFile, $newIndexFile)) {
             echo "failed to copy $indexFile...\n";
         } else {
+            file_put_contents($newIndexFile, str_replace('%%namespace%%', $namespace, file_get_contents($newIndexFile)));
             file_put_contents($newIndexFile, str_replace('%%formHeadingHtml%%', $formHeadingHtml, file_get_contents($newIndexFile)));
             file_put_contents($newIndexFile, str_replace('%%formBodyHtml%%', $formBodyHtml, file_get_contents($newIndexFile)));
             file_put_contents($newIndexFile, str_replace('%%crudName%%', $crudName, file_get_contents($newIndexFile)));
@@ -157,9 +204,12 @@ class CrudViewCommand extends Command
         if (!copy($createFile, $newCreateFile)) {
             echo "failed to copy $createFile...\n";
         } else {
-            file_put_contents($newCreateFile, str_replace('%%crudName%%', $crudName, file_get_contents($newCreateFile)));
-            file_put_contents($newCreateFile, str_replace('%%crudNameSingularCap%%', $crudNameSingularCap, file_get_contents($newCreateFile)));
+            file_put_contents($newCreateFile, str_replace('%%namespace%%', $namespace, file_get_contents($newCreateFile)));
             file_put_contents($newCreateFile, str_replace('%%formFieldsHtml%%', $formFieldsHtml, file_get_contents($newCreateFile)));
+            file_put_contents($newCreateFile, str_replace('%%crudName%%', $crudName, file_get_contents($newCreateFile)));
+            file_put_contents($newCreateFile, str_replace('%%crudNameSingular%%', $crudNameSingular, file_get_contents($newCreateFile)));
+            file_put_contents($newCreateFile, str_replace('%%crudNameSingularCap%%', $crudNameSingularCap, file_get_contents($newCreateFile)));
+
         }
 
         // For edit.blade.php file
@@ -168,10 +218,12 @@ class CrudViewCommand extends Command
         if (!copy($editFile, $newEditFile)) {
             echo "failed to copy $editFile...\n";
         } else {
+            file_put_contents($newEditFile, str_replace('%%namespace%%', $namespace, file_get_contents($newEditFile)));
+            file_put_contents($newEditFile, str_replace('%%formFieldsHtml%%', $formFieldsHtml, file_get_contents($newEditFile)));
             file_put_contents($newEditFile, str_replace('%%crudNameCap%%', $crudNameCap, file_get_contents($newEditFile)));
             file_put_contents($newEditFile, str_replace('%%crudNameSingular%%', $crudNameSingular, file_get_contents($newEditFile)));
             file_put_contents($newEditFile, str_replace('%%crudNameSingularCap%%', $crudNameSingularCap, file_get_contents($newEditFile)));
-            file_put_contents($newEditFile, str_replace('%%formFieldsHtml%%', $formFieldsHtml, file_get_contents($newEditFile)));
+
         }
 
         // For show.blade.php file
@@ -180,27 +232,28 @@ class CrudViewCommand extends Command
         if (!copy($showFile, $newShowFile)) {
             echo "failed to copy $showFile...\n";
         } else {
-            file_put_contents($newShowFile, str_replace('%%formHeadingHtml%%', $formHeadingHtml, file_get_contents($newShowFile)));
-            file_put_contents($newShowFile, str_replace('%%formBodyHtml%%', $formBodyHtmlForShowView, file_get_contents($newShowFile)));
+            file_put_contents($newShowFile, str_replace('%%namespace%%', $namespace, file_get_contents($newShowFile)));
+            file_put_contents($newShowFile, str_replace('%%showRows%%', $showRows, file_get_contents($newShowFile)));
+            file_put_contents($newShowFile, str_replace('%%crudName%%', $crudName, file_get_contents($newShowFile)));
             file_put_contents($newShowFile, str_replace('%%crudNameSingular%%', $crudNameSingular, file_get_contents($newShowFile)));
             file_put_contents($newShowFile, str_replace('%%crudNameSingularCap%%', $crudNameSingularCap, file_get_contents($newShowFile)));
         }
 
         $langDirectory = base_path('resources/lang/en');
 
-        if (!File::isDirectory($langDirectory)) {
-            File::makeDirectory($langDirectory, 0755, true);
+        if (!is_dir($langDirectory)) {
+            mkdir($langDirectory, 0755, true);
         }
 
         $langFile = __DIR__ . '/../stubs/lang.stub';
-        $newLangFile = $langDirectory . '/en.php';
-        if (!File::copy($langFile, $newLangFile)) {
+        $newLangFile = $langDirectory . "/$crudNameSingular.php";
+        if (!copy($langFile, $newLangFile)) {
             echo "failed to copy $langFile...\n";
         } else {
-            File::put($newLangFile, str_replace('%%crudNameSingular%%', $crudNameSingular, File::get($newLangFile)));
-            File::put($newLangFile, str_replace('%%crudNameSingularCap%%', $crudNameSingularCap, File::get($newLangFile)));
-            File::put($newLangFile, str_replace('%%crudNamePluralCap%%', $crudNamePluralCap, File::get($newLangFile)));
-            File::put($newLangFile, str_replace('%%labels%%', implode(",\n", $labels), File::get($newLangFile)));
+            file_put_contents($newLangFile, str_replace('%%crudNameSingular%%', $crudNameSingular, file_get_contents($newLangFile)));
+            file_put_contents($newLangFile, str_replace('%%crudNameSingularCap%%', $crudNameSingularCap, file_get_contents($newLangFile)));
+            file_put_contents($newLangFile, str_replace('%%crudNamePluralCap%%', $crudNamePluralCap, file_get_contents($newLangFile)));
+            file_put_contents($newLangFile, str_replace('%%labels%%', implode(",\n    ", $labels), file_get_contents($newLangFile)));
         }
 
         // For layouts/master.blade.php file

@@ -8,7 +8,7 @@ return [
     'delete' => 'Delete',
     'update' => 'Update',
     'actions' => 'Actions',
-    'no' => 'No.',
+    'ordinal_number' => '#',
     'edit_save' => 'Save',
     %%labels%%
 
