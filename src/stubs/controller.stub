@@ -5,12 +5,13 @@ namespace DummyNamespace;
 use DummyRootNamespaceHttp\Requests;
 use DummyRootNamespaceHttp\Controllers\Controller;
 
-use DummyRootNamespace{{crudNamePluralCap}};
+use DummyRootNamespace{{crudNameCap}};
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class DummyClass extends Controller
 {
+    const INDEX = '{{crudName}}';
 
 	/**
 	 * Display a listing of the resource.
@@ -19,8 +20,11 @@ class DummyClass extends Controller
 	 */
 	public function index()
 	{
-		${{crudNamePlural}} = {{crudNamePluralCap}}::latest()->get();
-		return view('{{viewPath}}{{crudName}}.index', compact('{{crudNamePlural}}'));
+		${{crudNamePlural}} = {{crudNameCap}}::latest()->get();
+		return view('{{crudName}}.index', [
+		    '{{crudNamePlural}}' => ${{crudNamePlural}},
+		    'prefix' => self::INDEX
+        ]);
 	}
 
 	/**
@@ -30,7 +34,7 @@ class DummyClass extends Controller
 	 */
 	public function create()
 	{
-		return view('{{viewPath}}{{crudName}}.create');
+		return view('{{crudName}}.create');
 	}
 
 	/**
@@ -40,9 +44,9 @@ class DummyClass extends Controller
 	 */
 	public function store(Request $request)
 	{
-		//$this->validate($request, ['name' => 'required']); // Uncomment and modify if you need to validate any input.
-		{{crudNamePluralCap}}::create($request->all());
-		return redirect('{{crudName}}');
+		//$this->validate($request, ['name' => 'required']); // Uncomment and modify if needed.
+		{{crudNameCap}}::create($request->all());
+		return redirect(self::INDEX);
 	}
 
 	/**
@@ -53,8 +57,8 @@ class DummyClass extends Controller
 	 */
 	public function show($id)
 	{
-		${{crudNameSingular}} = {{crudNamePluralCap}}::findOrFail($id);
-		return view('{{viewPath}}{{crudName}}.show', compact('{{crudNameSingular}}'));
+		${{crudNameSingular}} = {{crudNameCap}}::findOrFail($id);
+		return view('{{crudName}}.show', compact('{{crudNameSingular}}'));
 	}
 
 	/**
@@ -65,8 +69,8 @@ class DummyClass extends Controller
 	 */
 	public function edit($id)
 	{
-		${{crudNameSingular}} = {{crudNamePluralCap}}::findOrFail($id);
-		return view('{{viewPath}}{{crudName}}.edit', compact('{{crudNameSingular}}'));
+		${{crudNameSingular}} = {{crudNameCap}}::findOrFail($id);
+		return view('{{crudName}}.edit', compact('{{crudNameSingular}}'));
 	}
 
 	/**
@@ -77,10 +81,10 @@ class DummyClass extends Controller
 	 */
 	public function update($id, Request $request)
 	{
-		//$this->validate($request, ['name' => 'required']); // Uncomment and modify if you need to validate any input.
-		${{crudNameSingular}} = {{crudNamePluralCap}}::findOrFail($id);
+		//$this->validate($request, ['name' => 'required']); // Uncomment and modify if needed.
+		${{crudNameSingular}} = {{crudNameCap}}::findOrFail($id);
 		${{crudNameSingular}}->update($request->all());
-		return redirect('{{crudName}}');
+		return redirect(self::INDEX);
 	}
 
 	/**
@@ -91,8 +95,8 @@ class DummyClass extends Controller
 	 */
 	public function destroy($id)
 	{
-		{{crudNamePluralCap}}::destroy($id);
-		return redirect('{{crudName}}');
+		{{crudNameCap}}::destroy($id);
+		return redirect(self::INDEX);
 	}
 
 }

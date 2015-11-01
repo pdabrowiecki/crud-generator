@@ -17,25 +17,29 @@
         {!! Form::submit(trans('%%crudNameSingular%%.create_save'), ['class' => 'btn btn-primary pull-right']) !!}
     </div>
     {!! Form::close() !!}
-
-    @if ($errors->any())
-        <ul class="alert alert-danger">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    @endif
-
 @endsection
 
 @section('js')
 <script>
     $.fn.datepicker.defaults.format = "yyyy-mm-dd";
     $.fn.datepicker.defaults.language = "{!! App::getLocale() !!}";
-    $('.optional').change(function() {
-        $(this).parent().next().attr('disabled', !this.checked);
-    }).each(function() {
-        $(this).parent().next().attr('disabled', !this.checked);
+    $(document).ready(function() {
+        $('.optional').change(function() {
+            $(this).parent().next().attr('disabled', !this.checked);
+
+            if (!this.checked) {
+                $(this).parent().next().val('');
+                $(this).parent().next().attr('readonly', 'readonly');
+            } else {
+                $(this).parent().next().removeAttr('readonly');
+            }
+        }).each(function() {
+            this.checked = $(this).parent().next().val() ? true : false;
+            $(this).parent().next().attr('disabled', !this.checked);
+        });
+        $('form').submit(function() {
+            $(this).find('input').attr('disabled', false);
+        });
     });
 </script>
 @endsection

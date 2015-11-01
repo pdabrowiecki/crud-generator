@@ -1,12 +1,11 @@
-<?php 
-
-namespace DummyNamespace;
+<?php namespace DummyNamespace;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Documentable;
 
-class DummyClass extends Model
-{
+class DummyClass extends Model  {
 
+    use Documentable;
     /**
      * The database table used by the model.
      *
@@ -21,4 +20,7 @@ class DummyClass extends Model
      */
     protected $fillable = {{fillable}};
 
+    public function url() {
+        return "admin/.../{$this->id}";
+    }
 }

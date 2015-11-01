@@ -44,6 +44,7 @@ class CrudViewCommand extends Command
             case 'boolean':
                 return "{!! Form::checkbox('" . $item['name'] . "', null, null) !!}";
 
+            case 'decimal':
             case 'integer':
                 return $optional
                 . "{!! Form::number('" . $item['name'] . "', null, ['class' => 'form-control']) !!}";
@@ -61,12 +62,16 @@ class CrudViewCommand extends Command
             case 'currency':
                 return $optional
                      . "{!! Form::number('" . $item['name'] . "', null, ['class' => 'form-control']) !!}" . PHP_EOL
-                     . '<span class="input-group-addon">zł</span>';
+                . '<span class="input-group-addon">zł</span>';
 
             case 'password':
                 return $optional
                      . "{!! Form::password('" . $item['name'] . "', null, ['class' => 'form-control']) !!}";
 
+            case 'url':
+                return $optional
+                     . "{!! Form::url('" . $item['name'] . "', null, ['class' => 'form-control']) !!}" . PHP_EOL
+                     . '<span class="input-group-addon"><i class="fa fa-external-link"></i></span>';
 
             case 'email':
                 return $optional
@@ -84,13 +89,22 @@ class CrudViewCommand extends Command
         switch($item['type'])
         {
             case 'boolean':
-                return "$%%crudNameSingular%%->$field ? trans('%%crudNameSingular%%.yes') : trans('%%crudNameSingular%%.no')";
+                return "<td>$%%crudNameSingular%%->$field ? trans('%%crudNameSingular%%.yes') : trans('%%crudNameSingular%%.no')</td>";
 
             default:
-                return $item['optional'] ? "$%%crudNameSingular%%->$field ?: trans('%%crudNameSingular%%.not_applicable')"
-                                         : "$%%crudNameSingular%%->$field";
+                if ($item['optional'])
+                {
+                    return <<<EOB
+@if ($%%crudNameSingular%%->$field)
+    <td>{{ $%%crudNameSingular%%->$field }}</td>
+@else
+    <td class="text-muted">{{ trans('%%crudNameSingular%%.not_applicable') }}</td>
+@endif
+EOB;
+                } else {
+                    return "<td>{{ $%%crudNameSingular%%->$field }}</td>";
+                }
         }
-
     }
 
     /**
@@ -141,7 +155,13 @@ class CrudViewCommand extends Command
             if ($item['hidden']) {
                 $formFieldsHtml .= "{!! Form::hidden('{$item['name']}', null) !!}\n";
             } else {
-                $formFieldsHtml .= '<div class="form-group">'
+                $formFieldsHtml .=
+                    "@if(\$error = \$errors->default->first('{$item['name']}'))\n"
+                    .  "<div class=\"form-group has-error\">"
+                    .  '<label class="control-label col-sm-12" for="'. $item['name'].'"><i class="fa fa-times-circle-o"></i> {{ $error }}</label>'
+                    . "@else\n"
+                      .  "<div class=\"form-group\">"
+                    . "@endif\n"
                     . "\n{!! Form::label('" . $item['name'] . "', " . $label . ". ': ', ['class' => 'col-sm-3 control-label']) !!}\n"
                     . "<div class=\"col-sm-9\">\n"
                     . '<div class="input-group col-sm-12">' . PHP_EOL
@@ -166,13 +186,13 @@ class CrudViewCommand extends Command
 
             $showRows .= "<tr>" . PHP_EOL
                       .  "    <th>{{ trans('%%crudName%%.label_$field') }}</th>" . PHP_EOL
-                      .  "    <td>{{ {$this->showField($value)} }}</td>" . PHP_EOL
+                      .  "    {$this->showField($value)}" . PHP_EOL
                       .  "</tr>";
 
             $formHeadingHtml .= "<th>{{ trans('%%crudName%%.label_$field') }}</th>\n";
 
             if ($i == 0) {
-                $formBodyHtml .= '<td><a href="{{ url(\'/%%crudName%%\', $item->id) }}">{{ $item->' . $field . ' }}</a></td>';
+                $formBodyHtml .= '<td><a href="{{ $item->url() }}">{{ $item->' . $field . ' }}</a></td>';
             } else {
                 $formBodyHtml .= '<td>{{ $item->' . $field . ' }}</td>';
             }

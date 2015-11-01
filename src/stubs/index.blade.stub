@@ -42,6 +42,8 @@
                 </table>
             </div>
         </div>
-        <div class="box-body" style="display:block">
+        <div class="box-footer clearfix">
+            <a href="{{ action('%%namespace%%%%crudNameCap%%Controller@create') }}" class="btn btn-primary btn-sm">{{ trans('%%crudName%%.add_new') }}</a>
+        </div>
     </div>
 @endsection

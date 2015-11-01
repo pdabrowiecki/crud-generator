@@ -43,7 +43,7 @@ class CrudCommand extends Command
      */
     public function handle()
     {
-        $name = ucwords(strtolower($this->argument('name')));
+        $name = $this->argument('name');
 
         if ($this->option('fields')) {
             $fields = $this->option('fields');
@@ -59,7 +59,7 @@ class CrudCommand extends Command
             $fillable = "['" . $commaSeparetedString . "']";
 
             $this->call('crud:controller', ['name' => $name . 'Controller', '--crud-name' => $name, '--view-path' => $viewPath]);
-            $this->call('crud:model', ['name' => str_plural($name), '--fillable' => $fillable]);
+            $this->call('crud:model', ['name' => $name, '--fillable' => $fillable]);
             $this->call('crud:migration', ['name' => str_plural(strtolower($name)), '--schema' => $fields, '--pk' => $primaryKey]);
             $this->call('crud:view', ['name' => $name, '--fields' => $fields, '--path' => $viewPath]);
         } else {

@@ -18,6 +18,9 @@
             </table>
         </div>
     </div>
+    <div class="box-footer clearfix">
+        <a href="{{ url($prefix . '/'.$%%crudNameSingular%%->id.'/edit') }}" class="btn btn-primary btn-sm">{{ trans('%%crudNameSingular%%.update') }}</a>
+    </div>
 </div>
 
 @include('document.box', ['object' => $%%crudNameSingular%%])
