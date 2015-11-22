@@ -9,7 +9,7 @@
         <h2 class="box-title">{{ trans('%%crudNameSingular%%.edit_header') }}</h2>
     </div>
 
-    {!! Form::model($%%crudNameSingular%%, ['method' => 'PATCH', 'action' => ['%%namespace%%%%crudNameCap%%Controller@update', $%%crudNameSingular%%->id], 'class' => 'form-horizontal']) !!}
+    {!! Form::model($%%crudNameSingular%%, ['method' => 'PATCH', 'url' => $%%crudNameSingular%%->url(), 'class' => 'form-horizontal']) !!}
     <div class="box-body">
         %%formFieldsHtml%%
     </div>

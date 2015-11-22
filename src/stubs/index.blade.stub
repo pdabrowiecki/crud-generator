@@ -1,5 +1,5 @@
 @extends('layouts.master')
-@section('breadcrumbs', Breadcrumbs::render('%%crudNamePlural%%'))
+@section('breadcrumbs', Breadcrumbs::render('%%crudNamePlural%%', $parent))
 @endsection
 
 @section('content')
@@ -30,9 +30,9 @@
                             <td>{{ $x }}</td>
                             %%formBodyHtml%%
                             <td>
-                            <a href="{{ url($prefix . '/'.$item->id.'/edit') }}"><button type="submit" class="btn btn-primary btn-xs">{{ trans('%%crudName%%.update') }}</button></a>
+                            <a href="{{ $item->url('edit') }}"><button type="submit" class="btn btn-primary btn-xs">{{ trans('%%crudName%%.update') }}</button></a>
                              /
-                             {!! Form::open(['method'=>'delete','action'=>['%%namespace%%%%crudNameCap%%Controller@destroy',$item->id],
+                             {!! Form::open(['method'=>'delete','url'=>$item->url('delete'),
                              'style' => 'display:inline']) !!}<button type="submit" class="btn btn-danger btn-xs">{{ trans('%%crudName%%.delete') }}</button>{!!
                              Form::close() !!}
                              </td>
@@ -43,7 +43,7 @@
             </div>
         </div>
         <div class="box-footer clearfix">
-            <a href="{{ action('%%namespace%%%%crudNameCap%%Controller@create') }}" class="btn btn-primary btn-sm">{{ trans('%%crudName%%.add_new') }}</a>
+            <a href="{{ $parent->url('%%crudName%%/create') }}" class="btn btn-primary btn-sm">{{ trans('%%crudName%%.add_new') }}</a>
         </div>
     </div>
 @endsection

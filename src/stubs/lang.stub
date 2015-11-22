@@ -9,6 +9,7 @@ return [
     'update' => 'Update',
     'actions' => 'Actions',
     'ordinal_number' => '#',
+    'create_save' => 'Create',
     'edit_save' => 'Save',
     %%labels%%
 
